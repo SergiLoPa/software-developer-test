@@ -1,3 +1,4 @@
+from collections import defaultdict
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -54,3 +55,23 @@ def get_purchases(country: Optional[str] = None, start_date: Optional[date] = No
     if end_date:
         filtered = [p for p in filtered if p.purchase_date <= end_date]
     return filtered
+
+@app.get("/purchases/kpis")
+def calculate_kpis():
+    if not purchases:
+        return {"error": "no purchases available"}
+    
+    clients = defaultdict(float)
+    clients_per_country = defaultdict(int)
+
+    for purchase in purchases:
+        clients_per_country[purchase.country] += 1
+        clients[purchase.customer_name] += purchase.amount
+    
+    mean_purchase_per_client = sum(clients.values()) / len(clients) if clients else 0
+    
+    return {
+        "mean_purchase_per_client": mean_purchase_per_client,
+        "clients_per_country": clients_per_country
+    }
+    
