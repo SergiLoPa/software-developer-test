@@ -11,4 +11,9 @@ def test_add_bulk_purchases():
     print("Response JSON", response.json())
     assert response.status_code == 200
     assert "added" in response.json()
+
+def test_calculate_kpis():
+    response = client.get("purchases/kpis/")
+    assert response.status_code == 200
+    assert "mean_purchase_per_client" in response.json()
     
