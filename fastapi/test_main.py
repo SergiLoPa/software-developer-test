@@ -1,3 +1,4 @@
+from datetime import date
 from fastapi.testclient import TestClient
 from main import app
 
@@ -34,6 +35,15 @@ def test_get_purchases_by_country():
     assert response.status_code == 200
     assert response.json() != []
     assert all(purchase["country"] == "United States of America" for purchase in response.json())
+
+def test_get_purchases_by_date_range():
+     response = client.get("/purchases/?start_date=2024-01-01&end_date=2024-12-31")
+     assert response.status_code == 200
+     assert all(
+         date.fromisoformat(purchase["purchase_date"]) >= date(2024, 1, 1) and
+         date.fromisoformat(purchase["purchase_date"]) <= date(2024, 12, 31)
+         for purchase in response.json()
+     )
 
 def test_calculate_kpis():
     response = client.get("purchases/kpis/")
