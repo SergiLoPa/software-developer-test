@@ -4,7 +4,7 @@ from main import app
 
 client = TestClient(app)
 
-CSV_FILE_PATH = "../sample_purchases.csv"
+CSV_FILE_PATH = "/app/sample_purchases.csv"
 
 def test_add_purchase():
     response = client.post(
