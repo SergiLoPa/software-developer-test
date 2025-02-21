@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 from io import StringIO
 
-API_BASE_URL = "http://localhost:8000"
+API_BASE_URL = "http://fastapi:8000"
 
 st.title(":shopping_bags: Customer Purchases Dashboard")
 
