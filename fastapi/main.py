@@ -1,3 +1,4 @@
+import calendar
 from collections import defaultdict
 from fastapi import FastAPI, Query, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
@@ -137,8 +138,8 @@ def calculate_kpis(kpi_option: str):
         clients[purchase.customer_name] += purchase.amount
         purchases_per_client[purchase.customer_name] += 1
         revenue_per_country[purchase.country] += purchase.amount
-        month = datetime.strptime(purchase['purchase_date'], '%Y-%m-%d').strftime('%m')
-        sales_per_month[month] += purchase['amount']
+        month = purchase.purchase_date.strftime('%m')
+        sales_per_month[month] += purchase.amount
     
     # Calculate the mean purchase per client
     mean_purchase_per_client = sum(clients.values()) / len(clients) if clients else 0
@@ -149,6 +150,7 @@ def calculate_kpis(kpi_option: str):
     # Calculate the month with the highest sales
     top_month = max(sales_per_month, key=sales_per_month.get)
     top_month_sales = sales_per_month[top_month]
+    top_month = calendar.month_name[int(top_month)]
     
     return {
         "mean_purchase_per_client": mean_purchase_per_client,

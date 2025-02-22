@@ -126,7 +126,10 @@ with tab2:
             else:
                 st.subheader("📊 KPIs")
                 st.metric("Total Revenue", f"${kpis['total_revenue']:,.2f}")
-                st.metric("Mean purchase per client", kpis["mean_purchase_per_client"])
+                st.metric("Mean Purchase per Client", f"${kpis["mean_purchase_per_client"]:,.2f}")
+
+                month_name, total_sales = list(kpis['top_month'].items())[0]
+                st.metric("Month with Highest Sales", value=month_name, delta=f"${total_sales:,.2f}")
 
                 # Display number of clients per country in a table and choropleth map
                 st.subheader("🌍👥 Number of clients per country")
