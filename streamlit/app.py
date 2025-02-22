@@ -6,6 +6,8 @@ import pycountry
 
 # Fetch a list of all country names using pycountry for dropdowns or filters
 countries = [country.name for country in pycountry.countries]
+# Adapted United States to United States of America in order to match our sample_purchases.csv
+countries = [country.replace("United States", "United States of America") for country in countries]
 
 # Base URL for the FastAPI backend
 API_BASE_URL = "http://fastapi:8000"
@@ -122,9 +124,9 @@ with tab2:
             if "error" in kpis:
                 st.info(kpis["error"])
             else:
-                # Display mean purchase per client
-                st.subheader("🛒📊 Mean purchase per client:")
-                st.text(kpis["mean_purchase_per_client"])
+                st.subheader("📊 KPIs")
+                st.metric("Total Revenue", f"${kpis['total_revenue']:,.2f}")
+                st.metric("Mean purchase per client", kpis["mean_purchase_per_client"])
 
                 # Display number of clients per country in a table and choropleth map
                 st.subheader("🌍👥 Number of clients per country")
@@ -138,5 +140,16 @@ with tab2:
                     color_continuous_scale="Reds",
                 )
                 st.plotly_chart(fig)
+
+                # Sort the countries by total spending in descending order and select the top 10.
+                top_countries = sorted(kpis['top_countries_by_revenue'].items(), key=lambda x: x[1], reverse=True)[:10]
+                countries = [country for country, _ in top_countries]
+                spending = [amount for _, amount in top_countries]
+                # Create a bar chart showing the total spending for the top 10 countries.
+                fig = px.bar(x=countries, y=spending, labels={'x': 'Country', 'y': 'Total Spending ($)'}, 
+                title='Top 10 Countries by Spending', color=spending, color_continuous_scale='Reds')
+                st.plotly_chart(fig)
+
+
         else:
             st.error("Error fetching KPIs.")

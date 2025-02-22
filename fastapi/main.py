@@ -140,22 +140,13 @@ def calculate_kpis(kpi_option: str):
     # Calculate the mean purchase per client
     mean_purchase_per_client = sum(clients.values()) / len(clients) if clients else 0
 
-    # Calculate the repeat purchase rate (percentage of clients who made more than one purchase)
-    repeat_customers = sum(1 for count in clients.values() if count > 1)
-    total_customers = len(clients)
-    repeat_purchase_rate = (repeat_customers / total_customers) * 100 if total_customers > 0 else 0
-
     # Calculate the total revenue from the purchases
     total_revenue = sum(purchase.amount for purchase in purchases_set)
     
-    # Sort countries by revenue in descending order
-    top_countries_by_revenue = sorted(revenue_per_country.items(), key=lambda x: x[1], reverse=True)
-    
     return {
         "mean_purchase_per_client": mean_purchase_per_client,
-        "repeat_purchase_rate": repeat_purchase_rate,
         "total_revenue": total_revenue,
         "clients_per_country": clients_per_country,
-        "top_countries_by_revenue": top_countries_by_revenue
+        "top_countries_by_revenue": revenue_per_country
     }
     
