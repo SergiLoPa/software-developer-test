@@ -89,7 +89,7 @@ with tab2:
     
     query_params = {}
     if country_filter:
-        query_params["country"] = country_filter
+        query_params["countries"] = country_filter
     if start_date:
         query_params["start_date"] = start_date.isoformat()
     if end_date:
