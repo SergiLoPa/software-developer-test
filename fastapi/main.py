@@ -1,5 +1,5 @@
 from collections import defaultdict
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, Query, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from datetime import date
@@ -46,10 +46,11 @@ async def add_bulk_purchases(file: UploadFile = File(...)):
     return JSONResponse(content={"added": len(new_purchases)})
 
 @app.get("/purchases/", response_model=List[Purchase])
-def get_purchases(country: Optional[str] = None, start_date: Optional[date] = None, end_date: Optional[date] = None):
+def get_purchases(countries: Optional[List[str]] = Query(None), start_date: Optional[date] = None, end_date: Optional[date] = None):
     filtered = purchases
-    if country:
-        filtered = [p for p in filtered if p.country.lower() == country.lower()]
+    if countries:
+        countries_lower = [c.lower() for c in countries]
+        filtered = [p for p in filtered if p.country.lower() in countries_lower]
     if start_date:
         filtered = [p for p in filtered if p.purchase_date >= start_date]
     if end_date:
