@@ -110,8 +110,13 @@ with tab2:
 
     # Section to compute and display KPIs
     st.header("Compute KPIs")
+    option_purchases = st.radio(
+    "Which set of purchases do you want to use?",
+    ["All purchases", "Filtered purchases"],
+    )
+    params = {"kpi_option": option_purchases}
     if st.button("Compute KPIs"):
-        response = requests.get(f"{API_BASE_URL}/purchases/kpis")
+        response = requests.get(f"{API_BASE_URL}/purchases/kpis", params=params)
         if response.status_code == 200:
             kpis = response.json()
             # Display mean purchase per client
