@@ -119,21 +119,24 @@ with tab2:
         response = requests.get(f"{API_BASE_URL}/purchases/kpis", params=params)
         if response.status_code == 200:
             kpis = response.json()
-            # Display mean purchase per client
-            st.subheader("🛒📊 Mean purchase per client:")
-            st.text(kpis["mean_purchase_per_client"])
+            if "error" in kpis:
+                st.info(kpis["error"])
+            else:
+                # Display mean purchase per client
+                st.subheader("🛒📊 Mean purchase per client:")
+                st.text(kpis["mean_purchase_per_client"])
 
-            # Display number of clients per country in a table and choropleth map
-            st.subheader("🌍👥 Number of clients per country")
-            df = pd.DataFrame(list(kpis["clients_per_country"].items()), columns=["Country", "Number of Clients"])
-            st.dataframe(df, hide_index=True, width=400)
-            fig = px.choropleth(
-                df,
-                locations="Country",
-                locationmode="country names",
-                color="Number of Clients",
-                color_continuous_scale="Reds",
-            )
-            st.plotly_chart(fig)
+                # Display number of clients per country in a table and choropleth map
+                st.subheader("🌍👥 Number of clients per country")
+                df = pd.DataFrame(list(kpis["clients_per_country"].items()), columns=["Country", "Number of Clients"])
+                st.dataframe(df, hide_index=True, width=400)
+                fig = px.choropleth(
+                    df,
+                    locations="Country",
+                    locationmode="country names",
+                    color="Number of Clients",
+                    color_continuous_scale="Reds",
+                )
+                st.plotly_chart(fig)
         else:
             st.error("Error fetching KPIs.")

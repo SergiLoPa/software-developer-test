@@ -11,6 +11,7 @@ app = FastAPI(title="Customer Purchases API")
 
 # In-memory storage
 purchases = []
+filtered = []
 
 class Purchase(BaseModel):
     customer_name: str
@@ -47,6 +48,7 @@ async def add_bulk_purchases(file: UploadFile = File(...)):
 
 @app.get("/purchases/", response_model=List[Purchase])
 def get_purchases(countries: Optional[List[str]] = Query(None), start_date: Optional[date] = None, end_date: Optional[date] = None):
+    global filtered
     filtered = purchases
     if countries:
         countries_lower = [c.lower() for c in countries]
@@ -58,14 +60,20 @@ def get_purchases(countries: Optional[List[str]] = Query(None), start_date: Opti
     return filtered
 
 @app.get("/purchases/kpis")
-def calculate_kpis():
-    if not purchases:
-        return {"error": "no purchases available"}
+def calculate_kpis(kpi_option: str):
+    if kpi_option == "All purchases":
+        if not purchases:
+            return {"error": "no purchases available"}
+        purchases_set = purchases
+    else:
+        if not filtered:
+            return {"error": "no filtered purchases available"}
+        purchases_set = filtered
     
     clients = defaultdict(float)
     clients_per_country = defaultdict(int)
 
-    for purchase in purchases:
+    for purchase in purchases_set:
         clients_per_country[purchase.country] += 1
         clients[purchase.customer_name] += purchase.amount
     
