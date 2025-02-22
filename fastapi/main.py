@@ -2,7 +2,7 @@ from collections import defaultdict
 from fastapi import FastAPI, Query, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from datetime import date
+from datetime import date, datetime
 from typing import Optional, List
 import io
 import csv
@@ -130,23 +130,31 @@ def calculate_kpis(kpi_option: str):
     purchases_per_client = defaultdict(int)
     clients_per_country = defaultdict(int)
     revenue_per_country = defaultdict(float)
+    sales_per_month = defaultdict(float)
 
     for purchase in purchases_set:
         clients_per_country[purchase.country] += 1
         clients[purchase.customer_name] += purchase.amount
         purchases_per_client[purchase.customer_name] += 1
         revenue_per_country[purchase.country] += purchase.amount
+        month = datetime.strptime(purchase['purchase_date'], '%Y-%m-%d').strftime('%m')
+        sales_per_month[month] += purchase['amount']
     
     # Calculate the mean purchase per client
     mean_purchase_per_client = sum(clients.values()) / len(clients) if clients else 0
 
     # Calculate the total revenue from the purchases
     total_revenue = sum(purchase.amount for purchase in purchases_set)
+
+    # Calculate the month with the highest sales
+    top_month = max(sales_per_month, key=sales_per_month.get)
+    top_month_sales = sales_per_month[top_month]
     
     return {
         "mean_purchase_per_client": mean_purchase_per_client,
         "total_revenue": total_revenue,
         "clients_per_country": clients_per_country,
-        "top_countries_by_revenue": revenue_per_country
+        "top_countries_by_revenue": revenue_per_country,
+        "top_month": {top_month: top_month_sales}
     }
     
