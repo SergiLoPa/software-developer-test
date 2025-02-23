@@ -112,12 +112,18 @@ with tab2:
 
     # Section to compute and display KPIs
     st.header("Compute KPIs")
-    option_purchases = st.radio(
-    "Which set of purchases do you want to use?",
-    ["All purchases", "Filtered purchases"],
-    )
-    params = {"kpi_option": option_purchases}
-    if st.button("Compute KPIs"):
+
+    # Form to choose purchases set and change number of days predicted
+    with st.form("kpis_form"):
+        option_purchases = st.radio(
+        "Which set of purchases do you want to use?",
+        ["All purchases", "Filtered purchases"],
+        )
+        days_forecast_sales = st.number_input("How many days do you want to predict?", min_value=1, value=30)
+        compute_kpis = st.form_submit_button("Compute KPIs")
+    params = {"kpi_option": option_purchases, "days": days_forecast_sales}
+    
+    if compute_kpis:
         response = requests.get(f"{API_BASE_URL}/purchases/kpis", params=params)
         if response.status_code == 200:
             kpis = response.json()
