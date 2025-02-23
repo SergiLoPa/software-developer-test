@@ -153,6 +153,22 @@ with tab2:
                 title='Top 10 Countries by Spending', color=spending, color_continuous_scale='Reds')
                 st.plotly_chart(fig)
 
+                # Forecast sales
+                if "error" not in kpis["forecast_sales"]:
+                    st.subheader("📈🔮 Forecast sales")
+                    forecast_df = pd.DataFrame(kpis["forecast_sales"])
+                    st.write(forecast_df)
+                    forecast_df["ds"] = pd.to_datetime(forecast_df["ds"])
+                    fig = px.line(forecast_df, x="ds", y="yhat", title="Forecast Sales",
+                                labels={"ds": "Date", "yhat": "Predicted Sales"})
+                    fig.add_traces([
+                    px.line(forecast_df, x="ds", y="yhat_lower").data[0],
+                    px.line(forecast_df, x="ds", y="yhat_upper").data[0]
+                    ])
+                    st.plotly_chart(fig)
+                else:
+                    st.info(kpis["forecast_sales"]["error"])
+
 
         else:
             st.error("Error fetching KPIs.")
