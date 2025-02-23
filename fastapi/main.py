@@ -113,8 +113,9 @@ def calculate_kpis(kpi_option: str, days: int = 30):
     - kpi_option: A string specifying which data to use ("All purchases" or "Filtered purchases").
 
     Returns:
-    - A dictionary containing the calculated KPIs such as mean purchase per client, repeat purchase rate, 
-      total revenue, and top countries by revenue.
+    - A dictionary containing the calculated KPIs such as mean purchase per client, 
+      total revenue, clients per country, top countries by revenue, month with
+      highest sales and forecast sales
     
     Raises:
     - HTTPException: If there are no purchases available for the selected KPI option.
@@ -140,6 +141,7 @@ def calculate_kpis(kpi_option: str, days: int = 30):
         clients[purchase.customer_name] += purchase.amount
         purchases_per_client[purchase.customer_name] += 1
         revenue_per_country[purchase.country] += purchase.amount
+        # Extract the month and format it as a two-digit string
         month = purchase.purchase_date.strftime('%m')
         sales_per_month[month] += purchase.amount
     
@@ -152,12 +154,15 @@ def calculate_kpis(kpi_option: str, days: int = 30):
     # Calculate the month with the highest sales
     top_month = max(sales_per_month, key=sales_per_month.get)
     top_month_sales = sales_per_month[top_month]
+    # Convert month into a string
     top_month = calendar.month_name[int(top_month)]
 
     # Predict future sales using Prophet
     if len(purchases_set) > 2:
         df = pd.DataFrame([(p.purchase_date, p.amount) for p in purchases_set], columns=["ds", "y"])
+        # Convert the "ds" column to datetime format for proper date handling
         df["ds"] = pd.to_datetime(df["ds"])
+        # Group the data by date ("ds") and sum the amounts ("y") for each date, then reset the index
         df = df.groupby("ds").sum().reset_index()
         
         model = Prophet()
@@ -166,7 +171,10 @@ def calculate_kpis(kpi_option: str, days: int = 30):
         future = model.make_future_dataframe(periods=days)
         forecast = model.predict(future)
         
+        # Get the last date in the original data to filter the forecasted results
         last_date = df["ds"].max()
+        # Extract only the future forecasted data
+        # Include the predicted values ("yhat") and confidence intervals ("yhat_lower", "yhat_upper")
         forecast_future = forecast[forecast["ds"] > last_date][["ds", "yhat", "yhat_lower", "yhat_upper"]]
     else:
         forecast_future = {"error": "more than two rows are required to predict sales"}
