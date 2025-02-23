@@ -136,6 +136,7 @@ with tab2:
             if "error" in kpis:
                 st.info(kpis["error"])
             else:
+                # Display KPIs such as total revenue, mean purchase per client and month with the highest sales
                 st.subheader("📊 KPIs")
                 st.metric("Total Revenue", f"${kpis['total_revenue']:,.2f}")
                 st.metric("Mean Purchase per Client", f"${kpis["mean_purchase_per_client"]:,.2f}")
@@ -156,11 +157,11 @@ with tab2:
                 )
                 st.plotly_chart(fig)
 
-                # Sort the countries by total spending in descending order and select the top 10.
+                # Sort the countries by total spending in descending order and select the top 10
                 top_countries = sorted(kpis['top_countries_by_revenue'].items(), key=lambda x: x[1], reverse=True)[:10]
                 countries = [country for country, _ in top_countries]
                 spending = [amount for _, amount in top_countries]
-                # Create a bar chart showing the total spending for the top 10 countries.
+                # Create a bar chart showing the total spending for the top 10 countries
                 fig = px.bar(x=countries, y=spending, labels={'x': 'Country', 'y': 'Total Spending ($)'}, 
                 title='Top 10 Countries by Spending', color=spending, color_continuous_scale='Reds')
                 st.plotly_chart(fig)
@@ -168,14 +169,17 @@ with tab2:
                 # Forecast sales
                 if "error" not in kpis["forecast_sales"]:
                     st.subheader("📈🔮 Forecast sales")
+                    # Convert the forecast sales data into a pandas DataFrame
                     forecast_df = pd.DataFrame(kpis["forecast_sales"])
                     st.write(forecast_df)
                     forecast_df["ds"] = pd.to_datetime(forecast_df["ds"])
+                    # Create a Plotly line chart for the forecasted sales (yhat) over time (ds)
                     fig = px.line(forecast_df, x="ds", y="yhat", title="Forecast Sales",
                                 labels={"ds": "Date", "yhat": "Predicted Sales"})
+                    # Add lower and upper confidence intervals (yhat_lower and yhat_upper) to the plot
                     fig.add_traces([
-                    px.line(forecast_df, x="ds", y="yhat_lower").data[0],
-                    px.line(forecast_df, x="ds", y="yhat_upper").data[0]
+                    px.line(forecast_df, x="ds", y="yhat_lower", labels={"ds": "Date", "yhat_lower": "Lower Bound"}).data[0],
+                    px.line(forecast_df, x="ds", y="yhat_upper", labels={"ds": "Date", "yhat_upper": "Upper Bound"}).data[0]
                     ])
                     st.plotly_chart(fig)
                 else:
