@@ -68,17 +68,23 @@ with tab1:
     
     # Handle form submission for single purchase
     if submit_button:
-        data = {
-            "customer_name": customer_name,
-            "country": country,
-            "purchase_date": purchase_date.isoformat(),
-            "amount": amount,
-        }
-        response = requests.post(f"{API_BASE_URL}/purchase/", json=data)
-        if response.status_code == 200:
-            st.success("Purchase added successfully!")
+        # Verify that customer name and country are not empty
+        if not customer_name.strip():
+            st.error("Customer Name cannot be empty!")
+        elif not country.strip():
+            st.error("Country cannot be empty!")
         else:
-            st.error("Error adding purchase.")
+            data = {
+                "customer_name": customer_name,
+                "country": country,
+                "purchase_date": purchase_date.isoformat(),
+                "amount": amount,
+            }
+            response = requests.post(f"{API_BASE_URL}/purchase/", json=data)
+            if response.status_code == 200:
+                st.success("Purchase added successfully!")
+            else:
+                st.error("Error adding purchase.")
 
 # Analyze Data Tab
 with tab2:
@@ -122,7 +128,7 @@ with tab2:
         days_forecast_sales = st.number_input("How many days do you want to predict?", min_value=1, value=30)
         compute_kpis = st.form_submit_button("Compute KPIs")
     params = {"kpi_option": option_purchases, "days": days_forecast_sales}
-    
+
     if compute_kpis:
         response = requests.get(f"{API_BASE_URL}/purchases/kpis", params=params)
         if response.status_code == 200:
