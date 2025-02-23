@@ -11,13 +11,29 @@ The system follows a **client-server architecture** with the following component
 - **Backend (FastAPI)**: Handles API requests, processes purchases, and computes KPIs.
 - **Storage**: Purchases are stored in memory (extendable to a database).
 - **Docker**: Both frontend and backend are containerized for easy deployment.
+
+
+## 🧑‍💻 File structure
+```bash
+├── fastapi/
+│   ├── main.py                # FastAPI app and API endpoints
+│   ├── test_main.py           # Unit tests for FastAPI app
+│   ├── sample_purchases.csv   # Sample purchases for testing
+│   ├── requirements.txt       # Backend dependencies
+│   └── Dockerfile             # Dockerfile for FastAPI
+├── streamlit/
+│   ├── app.py                 # Streamlit app for UI
+│   ├── requirements.txt       # Frontend dependencies
+│   └── Dockerfile             # Dockerfile for Streamlit
+├── docker-compose.yml         # Docker Compose file to run both services
+```
 ## 🚀 Features
 
 ### Backend (FastAPI)
 ✅ **Add a single purchase** – `POST /purchase/`  
 ✅ **Bulk upload purchases** – `POST /purchase/bulk/` (CSV file)  
 ✅ **Filter purchases** – `GET /purchases/` (by date and country)  
-✅ **Compute KPIs** – `GET /purchases/kpis` (mean purchases per client, clients per country)  
+✅ **Compute KPIs** – `GET /purchases/kpis`  
 
 ### **Frontend (Streamlit)**
 📂 **Upload Tab**  
@@ -27,6 +43,18 @@ The system follows a **client-server architecture** with the following component
 📊 **Analyze Tab**  
    - Filter purchases by date and country.  
    - View key KPIs and customer distribution.
+
+## 📊 **Key Performance Indicators (KPIs)**
+
+| **KPI**                           | **Description**                                                                                                                                                          |
+|-----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **💰 Mean Purchase per Client**   | Average amount spent by each client.                                                                                                                                      |
+| **📈 Total Revenue**              | Total sum of all revenue generated from purchases.                                                                                                                         |
+| **🌍 Clients per Country**        | Number of clients from each country.                                                                                                                                      |
+| **🏆 Top Countries by Revenue**   | Countries that contribute the most to total revenue.                                                                                                                     |
+| **📅 Month with Highest Sales**   | The month with the highest sales volume.                                                                                                                                  |
+| **🔮 Forecast Sales using Prophet** | Future sales projections using the **Prophet** algorithm.                                                                                                                  |
+
 
 ## 🛠️ Getting Started
 
