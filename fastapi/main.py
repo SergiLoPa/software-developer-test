@@ -1,3 +1,4 @@
+from prophet import Prophet
 import calendar
 from collections import defaultdict
 from fastapi import FastAPI, Query, UploadFile, File, HTTPException
@@ -5,6 +6,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from datetime import date, datetime
 from typing import Optional, List
+import pandas as pd
 import io
 import csv
 
@@ -103,7 +105,7 @@ def get_purchases(countries: Optional[List[str]] = Query(None), start_date: Opti
     return filtered
 
 @app.get("/purchases/kpis")
-def calculate_kpis(kpi_option: str):
+def calculate_kpis(kpi_option: str, days: int = 30):
     """
     Calculates and returns various KPIs related to customer purchases.
 
@@ -151,12 +153,30 @@ def calculate_kpis(kpi_option: str):
     top_month = max(sales_per_month, key=sales_per_month.get)
     top_month_sales = sales_per_month[top_month]
     top_month = calendar.month_name[int(top_month)]
+
+    # Predict future sales using Prophet
+    if len(purchases_set) > 2:
+        df = pd.DataFrame([(p.purchase_date, p.amount) for p in purchases_set], columns=["ds", "y"])
+        df["ds"] = pd.to_datetime(df["ds"])
+        df = df.groupby("ds").sum().reset_index()
+        
+        model = Prophet()
+        model.fit(df)
+        
+        future = model.make_future_dataframe(periods=days)
+        forecast = model.predict(future)
+        
+        last_date = df["ds"].max()
+        forecast_future = forecast[forecast["ds"] > last_date][["ds", "yhat", "yhat_lower", "yhat_upper"]]
+    else:
+        forecast_future = {"error": "more than two rows are required to predict sales"}
     
     return {
         "mean_purchase_per_client": mean_purchase_per_client,
         "total_revenue": total_revenue,
         "clients_per_country": clients_per_country,
         "top_countries_by_revenue": revenue_per_country,
-        "top_month": {top_month: top_month_sales}
+        "top_month": {top_month: top_month_sales},
+        "forecast_sales": forecast_future
     }
     
